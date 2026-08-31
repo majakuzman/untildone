@@ -2,7 +2,24 @@
 
 A task tracker you drive from a chat window, that nags you every 30 minutes until you tick it off — on your Mac and your iPhone — using nothing you don't already own.
 
-**macOS only** (launchd + Apple Reminders). No accounts, no subscriptions, no dependencies beyond Python 3.8.
+![How it works](docs/img/hero.svg)
+
+**macOS only** (launchd + Apple Reminders). No accounts, no subscriptions, no dependencies beyond Python 3.8. Pre-release 0.99 — works, one user, one day old.
+
+## In 30 seconds
+
+| You say (to Claude, or type `./untildone …`) | What happens |
+|---|---|
+| *remind me to buy toothpaste at 5* | task, due today 17:00, nags every 30 min |
+| *pay the race entry tomorrow 2pm* | task, due tomorrow 14:00 |
+| *Sam is starting the QC report* | task for Sam, in progress — silent for you |
+| *idea: rotate morning tasks* | captured, no time, never nags |
+| *move toothpaste to 3pm* | due changed; the phone reminder moves with it |
+| *done toothpaste* — or just tick it on your phone | closed, reminder gone, logged with a timestamp |
+| *what's open?* · *what's Sam on?* | a live answer |
+| *export work tasks for September* | CSV, ready for a client |
+
+Full phrase list and what to expect: [docs/USER-GUIDE.md](docs/USER-GUIDE.md). The story in 12 slides: [docs/untildone-showcase.pdf](docs/untildone-showcase.pdf).
 
 ```
 you (Claude chat, or the `untildone` CLI)  ──writes a small JSON file──▶  daemon.py (runs every minute)
@@ -21,6 +38,19 @@ Every "remind me until I actually do it" feature is behind a paywall, and every 
 - **The messenger** — Apple Reminders, which is already on your phone, already syncs, and already has a tick-box.
 
 The one rule that makes it work: **nothing ever talks to a running process.** The chat writes a file; the daemon reads it and writes files back. That's the whole contract.
+
+## Who this is for (and who it isn't)
+
+Every piece here exists elsewhere: Due and Todoist Pro nag until done; Taskwarrior is a deeper CLI; Apple Reminders alone pings once and gives up. What's different is the combination — a conversation as the front end, an app you already own as the transport, and files as the only contract between the two.
+
+So it's for you if:
+
+- you already think out loud to an AI and are tired of copying the result into a task app;
+- you want a task system with no account, no subscription, and source you can read in twenty minutes;
+- you track other people's work but they'll never update a board — you're the only writer;
+- you like the pattern *AI writes a file, a daemon acts on it* and want to reuse it for something else.
+
+It's not for you if you want a polished app, cross-platform support today, or a shared team board. Due costs a few euros and has less friction if a chat isn't already where you live.
 
 ## Install (2 minutes)
 
@@ -43,7 +73,7 @@ At 17:00 your Mac notifies you and a `[T001] buy milk` reminder appears on your 
 
 ## Using it from Claude
 
-The point of the project. Paste [`CLAUDE.md`](CLAUDE.md) into a Claude Project's instructions, give Claude Desktop's Filesystem connector access to this folder, and talk normally: *"remind me to pay the half marathon Tuesday at 2"*, *"Dunja is starting the QC report"*, *"what's open?"*, *"done toothpaste"*. Day-to-day phrases and what to expect: [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). The story in 12 slides: [`docs/untildone-showcase.pdf`](docs/untildone-showcase.pdf).
+The point of the project. Paste [`CLAUDE.md`](CLAUDE.md) into a Claude Project's instructions, give Claude Desktop's Filesystem connector access to this folder, and talk normally: *"remind me to pay the half marathon Tuesday at 2"*, *"Dunja is starting the QC report"*, *"what's open?"*, *"done toothpaste"*.
 
 From a phone, Claude can't touch your files, so it drops the same JSON into a **Google Drive folder** that Google Drive for desktop syncs to your Mac. Set `drive_folder` in `config.json` (or answer the install prompt) and the daemon watches that folder too. Skip it and everything still works laptop-only.
 

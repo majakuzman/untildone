@@ -6,13 +6,13 @@ First public cut. Built in one day; everything below is live on one Mac and has 
 
 **Works**
 - Mailbox protocol: one JSON file per command (`add`, `update`, `done`, `snooze`, `export`, `cleanup`), ingested every 60 s from a local inbox and an optional Google Drive folder, deleted after ingest.
-- SQLite store with full status history (`status_log`) for per-person, per-period reporting; CSV export.
+- SQLite store with full status history (`status_log`) for per-person, per-period reporting; CSV export. `__version__` reported in `status.json`.
 - Nag loop: macOS notification + Apple Reminders re-arm every 30 min until done; quiet hours; snooze.
 - Pre-arming: every open task is on the phone with its due-time alert from creation, so the first alert fires even if the Mac sleeps.
 - Reverse sync: tick in Reminders on any device → task done; closing via chat clears the phone.
-- `untildone` CLI, `install.sh` (launchd agent, config prompts, retires legacy agent), `daemonctl`, smoke test that uses its own Reminders list.
+- `untildone` CLI, `install.sh` (launchd agent, config prompts, retires legacy agent), `daemonctl`, smoke test that uses its own Reminders list (`Claude-TEST`) and never touches yours.
 - `CLAUDE.md`: the chat-side protocol, with prerequisites.
-- Docs: user guide, 12-slide deck (PPTX + PDF).
+- Docs: README with hero graphic and 30-second usage table, `USER-GUIDE.md`, 12-slide deck (PPTX for presenting, PDF for reading on GitHub).
 
 **Known limits (why this is 0.99, not 1.0)**
 - macOS only. Linux/Raspberry Pi port (systemd + CalDAV) is the next milestone.
