@@ -1,16 +1,29 @@
 #!/bin/bash
-# Smoke test: runs the daemon against a throwaway folder. Works on macOS and Linux
-# (the Reminders bridge is a no-op where osascript is absent). Usage: bash tests/smoke.sh
+# Smoke test: runs the daemon against a throwaway folder. Works on macOS and Linux.
+# On macOS it exercises the real Apple Reminders bridge, but only in its own list
+# "Claude-TEST" with titles prefixed TEST; the list is deleted at the end.
+# It never touches your real "Claude" list. Usage: bash tests/smoke.sh
 set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-T="$(mktemp -d)"; export RD_HOME="$T" RD_DRIVE="$T/drive"; mkdir -p "$T/drive" "$T/inbox_local"
+T="$(mktemp -d)"; export RD_HOME="$T" RD_DRIVE="$T/drive" RD_REM_LIST="Claude-TEST"; mkdir -p "$T/drive" "$T/inbox_local"
 D="python3 $ROOT/daemon.py"
+cleanup() {
+  if command -v osascript >/dev/null 2>&1; then
+    osascript -e 'tell application "Reminders" to if exists list "Claude-TEST" then delete list "Claude-TEST"' >/dev/null 2>&1 || true
+  fi
+}
+trap cleanup EXIT
 $D init >/dev/null
-echo '{"action":"add","title":"buy toothpaste","due":"2030-01-01T17:00"}' > "$T/inbox_local/a1.json"
-echo '{"action":"add","title":"QC report","assignee":"Dunja","status":"in_progress","project":"work"}' > "$T/drive/a2.json"
-echo '{"action":"add","title":"buy milk","due":"2030-01-01T17:00"}' > "$T/inbox_local/a3.json"
-$D once | grep -q "added T001 buy toothpaste" || { echo FAIL add; exit 1; }
+echo '{"action":"add","title":"TEST buy toothpaste","due":"2030-01-01T17:00"}' > "$T/inbox_local/a1.json"
+echo '{"action":"add","title":"TEST QC report","assignee":"Dunja","status":"in_progress","project":"work"}' > "$T/drive/a2.json"
+echo '{"action":"add","title":"TEST buy milk","due":"2030-01-01T17:00"}' > "$T/inbox_local/a3.json"
+$D once | grep -q "added T001 TEST buy toothpaste" || { echo FAIL add; exit 1; }
 [ -z "$(ls "$T/inbox_local" "$T/drive" | grep '\.json$' | grep -v status)" ] || { echo FAIL "inbox not emptied"; exit 1; }
+if command -v osascript >/dev/null 2>&1; then
+  n="$(osascript -e 'tell application "Reminders" to count of (reminders of list "Claude-TEST" whose completed is false)' 2>/dev/null || echo 0)"
+  [ "$n" -ge 2 ] || { echo FAIL "expected pre-armed items in Claude-TEST, got $n"; exit 1; }
+  echo "reminders bridge OK ($n items in Claude-TEST)"
+fi
 echo '{"action":"done","id":"buy"}' > "$T/inbox_local/b1.json"
 $D once | grep -q "ambiguous 'buy'" || { echo FAIL ambiguity; exit 1; }
 echo '{"action":"done","id":"toothpaste"}' > "$T/inbox_local/b2.json"

@@ -294,7 +294,8 @@ def act_export(conn, cmd):
     return f"exported {len(rows)} rows to exports/{name}"
 
 
-ACTIONS = {"add": act_add, "update": act_update, "done": act_done, "snooze": act_snooze, "export": act_export}
+ACTIONS = {"add": act_add, "update": act_update, "done": act_done, "snooze": act_snooze, "export": act_export,
+           "cleanup": lambda conn, cmd: reminders_cleanup(conn)}
 
 # -------------------------------------------------------------- ingest ---
 def inbox_dirs():
@@ -359,11 +360,12 @@ def nag_pass(conn):
 
 
 # ------------------------------------------------- apple reminders ---
-REM_LIST = CFG.get("reminders_list", "Claude")
+REM_LIST = os.environ.get("RD_REM_LIST") or CFG.get("reminders_list", "Claude")
 REM_LEAD_SEC = 60   # alert time = now + this, so iCloud has time to sync before it fires
 
 
-HAS_OSA = shutil.which("osascript") is not None  # False on Linux: Reminders bridge becomes a no-op
+HAS_OSA = shutil.which("osascript") is not None and not os.environ.get("RD_NO_OSA")
+# False on Linux, or when RD_NO_OSA=1 (tests): the Reminders bridge becomes a no-op
 
 
 def osa(script, timeout=25):
@@ -483,6 +485,37 @@ def reminders_arm(conn):
         if rid:
             conn.execute("UPDATE tasks SET reminder_id=?, reminder_synced=? WHERE id=?", (rid, r["next_nag"], r["id"]))
     conn.commit()
+
+
+def reminders_cleanup(conn):
+    """Make the Reminders list match the DB: delete every item that is not exactly
+    '[Txxx] title' of an open task of mine; then force re-arm so missing ones come back.
+    Mailbox: {"action":"cleanup"}"""
+    if not HAS_OSA:
+        return "cleanup skipped (no Reminders bridge)"
+    rows = conn.execute(
+        "SELECT * FROM tasks WHERE assignee='me' AND kind='task' AND status IN (?,?,?)", OPEN_STATUSES
+    ).fetchall()
+    keep = {rem_title(r) for r in rows}
+    script = f'''
+    tell application "Reminders"
+      if not (exists list "{REM_LIST}") then return ""
+      set out to ""
+      repeat with r in (reminders of list "{REM_LIST}" whose completed is false)
+        set out to out & (name of r) & linefeed
+      end repeat
+      return out
+    end tell'''
+    names = [n for n in osa(script).split("\n") if n.strip()]
+    removed = []
+    for n in names:
+        if n not in keep:
+            osa(f'tell application "Reminders" to delete (reminders of list "{REM_LIST}" whose name is "{_q(n)}" and completed is false)')
+            removed.append(n)
+            log(f"REM  cleanup removed: {n}")
+    conn.execute("UPDATE tasks SET reminder_synced=NULL WHERE assignee='me' AND status IN (?,?,?)", OPEN_STATUSES)
+    conn.commit()
+    return f"cleanup: removed {len(removed)} stray item(s)" + (": " + "; ".join(removed) if removed else "")
 
 
 def reminders_close(conn):

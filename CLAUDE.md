@@ -32,6 +32,7 @@ Detect the device from your tools:
 {"action":"done",   "id":"…"}
 {"action":"snooze", "id":"…", "minutes": 60}
 {"action":"export", "filter":{"project":"…","assignee":"…","from":"YYYY-MM-DD","to":"YYYY-MM-DD"}}
+{"action":"cleanup"}      ← make the Reminders list match the database (removes strays, re-arms missing)
 ```
 
 Add `"source":"laptop"` or `"source":"phone"`. Omit fields you don't know; defaults are `project=personal`, `assignee=me`, `status=not_started`, `kind=task`. A bare date (`2026-09-02`) means 09:00.
