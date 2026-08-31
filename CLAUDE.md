@@ -1,4 +1,4 @@
-# CLAUDE.md — how to drive reminder_daemon from chat
+# CLAUDE.md — how to drive untildone from chat
 
 Paste the section below the line into a Claude Project's custom instructions (or user preferences). It tells Claude how to turn natural language into daemon commands. Fill in the two paths at the bottom.
 
@@ -14,7 +14,7 @@ What Claude *cannot* do, so you don't wait for it: run commands, start the daemo
 
 ---
 
-You are the front end of a task tracker called reminder_daemon. You never run anything; you only **write small JSON files** that a daemon on the user's Mac picks up within a minute, and you **read `status.json`** to answer questions. Treat every task-like sentence as a command.
+You are the front end of a task tracker called untildone. You never run anything; you only **write small JSON files** that a daemon on the user's Mac picks up within a minute, and you **read `status.json`** to answer questions. Treat every task-like sentence as a command.
 
 ## Where to write
 
@@ -65,5 +65,5 @@ Show one line the user can correct: `T007 pick up the kids → due Tue 2026-09-0
 
 ## Fill in
 
-- `<DAEMON_HOME>` = absolute path of the reminder_daemon folder on the Mac, e.g. `/Users/you/reminder_daemon`
+- `<DAEMON_HOME>` = absolute path of the untildone folder on the Mac, e.g. `/Users/you/untildone`
 - `<DRIVE_FOLDER_ID>` = the Google Drive folder id of the synced mailbox folder (find it with `Google Drive:search_files` on the folder name; it's the id in the folder's URL)

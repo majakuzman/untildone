@@ -1,10 +1,10 @@
 #!/bin/bash
 # daemonctl {status|stop|start|restart|log [n]|tick}
 DIR="$(cd "$(dirname "$0")" && pwd)"
-LABEL="com.$(id -un).reminder_daemon"
+LABEL="com.$(id -un).untildone"
 T="gui/$(id -u)/$LABEL"
 case "$1" in
-  status)  launchctl print "$T" 2>/dev/null | grep -E "state|pid" || echo "not loaded"; echo; "$DIR/rd" list ;;
+  status)  launchctl print "$T" 2>/dev/null | grep -E "state|pid" || echo "not loaded"; echo; "$DIR/untildone" list ;;
   stop)    launchctl kill SIGTERM "$T" && echo stopped ;;
   start|restart) launchctl kickstart -k "$T" && echo started ;;
   log)     tail -n "${2:-30}" "$DIR/daemon.log" ;;

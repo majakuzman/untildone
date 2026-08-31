@@ -1,11 +1,11 @@
-# reminder_daemon
+# untildone
 
 A task tracker you drive from a chat window, that nags you every 30 minutes until you tick it off — on your Mac and your iPhone — using nothing you don't already own.
 
 **macOS only** (launchd + Apple Reminders). No accounts, no subscriptions, no dependencies beyond Python 3.8.
 
 ```
-you (Claude chat, or the `rd` CLI)  ──writes a small JSON file──▶  daemon.py (runs every minute)
+you (Claude chat, or the `untildone` CLI)  ──writes a small JSON file──▶  daemon.py (runs every minute)
                                                                        │
                           Apple Reminders ◀── "[T012] pay half marathon" ── SQLite
                           (syncs to iPhone;                                (tasks + full status history)
@@ -25,7 +25,7 @@ The one rule that makes it work: **nothing ever talks to a running process.** Th
 ## Install (2 minutes)
 
 ```bash
-git clone <this repo> ~/reminder_daemon && cd ~/reminder_daemon
+git clone <this repo> ~/untildone && cd ~/untildone
 bash install.sh              # asks 4 questions, writes config.json, registers a launchd agent
 python3 daemon.py remtest    # grants Reminders access (macOS prompts you), fires one test alert
 ```
@@ -33,13 +33,13 @@ python3 daemon.py remtest    # grants Reminders access (macOS prompts you), fire
 Then:
 
 ```bash
-./rd add "buy milk" --due 17:00
-./rd add "QC report" --assignee Dunja --status in_progress --project work
-./rd list
-./rd done milk
+./untildone add "buy milk" --due 17:00
+./untildone add "QC report" --assignee Dunja --status in_progress --project work
+./untildone list
+./untildone done milk
 ```
 
-At 17:00 your Mac notifies you and a `[T001] buy milk` reminder appears on your phone. Every 30 minutes until you tick it — on either device — or say `rd done milk`.
+At 17:00 your Mac notifies you and a `[T001] buy milk` reminder appears on your phone. Every 30 minutes until you tick it — on either device — or say `untildone done milk`.
 
 ## Using it from Claude
 
@@ -55,7 +55,7 @@ From a phone, Claude can't touch your files, so it drops the same JSON into a **
 4. Pre-arms: every open task of yours has a Reminders item alerting at its due time, so the first alert fires from the phone's own clock even if the Mac is asleep.
 5. Rewrites `status.json` — open tasks by assignee, recent changes, last nags, any failed files.
 
-Tasks assigned to other people are tracked but never nag *you*. Every status change is logged in `status_log`, so "who was on what, from when to when" is a query, and `rd export --project work` gives you the CSV.
+Tasks assigned to other people are tracked but never nag *you*. Every status change is logged in `status_log`, so "who was on what, from when to when" is a query, and `untildone export --project work` gives you the CSV.
 
 ## The mailbox format
 
@@ -77,7 +77,7 @@ One JSON file per command. Missing fields take defaults.
 
 ```
 daemon.py       the whole thing (stdlib only)
-rd              CLI front end
+untildone       CLI front end
 install.sh      one-time setup + launchd agent      daemonctl   status / stop / start / log / tick
 CLAUDE.md       instructions for the chat side     tests/smoke.sh
 config.json     yours, gitignored                  tasks.db · status.json · daemon.log   yours, gitignored
@@ -86,7 +86,7 @@ config.json     yours, gitignored                  tasks.db · status.json · da
 ## Troubleshooting
 
 - **No notification on the Mac** → System Settings → Notifications → *Script Editor* must be allowed, and Focus / Do Not Disturb hides it unless you allow Script Editor in that Focus mode.
-- **No reminder on the phone** → run `python3 daemon.py remtest` from Terminal once; macOS will ask *"python3 wants access to control Reminders"*. launchd may ask a second time for the background process. Check `./rd log` for `REM  bump failed`.
+- **No reminder on the phone** → run `python3 daemon.py remtest` from Terminal once; macOS will ask *"python3 wants access to control Reminders"*. launchd may ask a second time for the background process. Check `./untildone log` for `REM  bump failed`.
 - **`state = running` but nothing happens** → `./daemonctl tick` runs one cycle in the foreground and prints what it did.
 - **Mac asleep** → the first alert of each task still reaches the phone (pre-armed). The 30-minute repeats resume when the Mac wakes. On a MacBook: Battery → Options → *Prevent automatic sleeping on power adapter when the display is off*.
 

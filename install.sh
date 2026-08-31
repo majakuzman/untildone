@@ -1,19 +1,22 @@
 #!/bin/bash
-# One-time install for reminder_daemon (macOS).
+# One-time install for untildone (macOS).
 #   bash install.sh          interactive: writes config.json, registers launchd agent, starts it
 #   bash install.sh remove   unregister the agent (keeps your data)
 # Re-running is safe; it replaces the agent and keeps an existing config.json.
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
-LABEL="com.$(id -un).reminder_daemon"
+LABEL="com.$(id -un).untildone"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+LEGACY_PLIST="$HOME/Library/LaunchAgents/com.$(id -un).reminder_daemon.plist"
 UID_="$(id -u)"
 
 if [ "$(uname)" != "Darwin" ]; then
-  echo "reminder_daemon currently runs on macOS only (launchd + Apple Reminders)."; exit 1
+  echo "untildone currently runs on macOS only (launchd + Apple Reminders)."; exit 1
 fi
 
 if [ "$1" = "remove" ]; then
+  launchctl bootout "gui/$UID_" "$LEGACY_PLIST" 2>/dev/null || true
+  rm -f "$LEGACY_PLIST"
   launchctl bootout "gui/$UID_" "$PLIST" 2>/dev/null || true
   rm -f "$PLIST"
   echo "removed $LABEL (data in $DIR untouched)"
@@ -22,7 +25,7 @@ fi
 
 # Safety: never let this folder's parent be a git repo (personal files live there for some users).
 if [ -d "$DIR/../.git" ]; then
-  echo "Refusing: the PARENT of $DIR is a git repository. Only reminder_daemon/ itself should be one."; exit 1
+  echo "Refusing: the PARENT of $DIR is a git repository. Only the untildone folder itself should be one."; exit 1
 fi
 
 # Use a system python, not a venv that might be deleted later.
@@ -35,7 +38,7 @@ PY="$(command -v python3)"
 
 # ---- config.json (only if missing) ----
 if [ ! -f "$DIR/config.json" ]; then
-  echo "== reminder_daemon setup =="
+  echo "== untildone setup =="
   echo "Optional: a Google Drive folder synced to this Mac, used as the mailbox for commands"
   echo "dropped from a phone. Leave empty to run laptop-only."
   read -r -p "Synced Drive folder path (or empty): " DRIVE
@@ -59,7 +62,7 @@ fi
 
 mkdir -p "$HOME/Library/LaunchAgents" "$DIR/inbox_local" "$DIR/exports"
 "$PY" "$DIR/daemon.py" init >/dev/null
-chmod +x "$DIR/rd" "$DIR/daemonctl" 2>/dev/null || true
+chmod +x "$DIR/untildone" "$DIR/daemonctl" 2>/dev/null || true
 
 # git hook (only if this folder is a repo)
 if [ -d "$DIR/.git" ]; then
@@ -87,6 +90,12 @@ cat > "$PLIST" <<EOF
 </plist>
 EOF
 
+# retire the pre-rename agent if it exists, then (re)register ours
+if [ -f "$LEGACY_PLIST" ]; then
+  launchctl bootout "gui/$UID_" "$LEGACY_PLIST" 2>/dev/null || true
+  rm -f "$LEGACY_PLIST"
+  echo "retired legacy agent com.$(id -un).reminder_daemon"
+fi
 launchctl bootout "gui/$UID_" "$PLIST" 2>/dev/null || true
 launchctl bootstrap "gui/$UID_" "$PLIST"
 launchctl kickstart -k "gui/$UID_/$LABEL"
@@ -98,5 +107,5 @@ else
 fi
 echo
 echo "Next: run  python3 $DIR/daemon.py remtest  once, to grant Reminders access and see a test alert."
-echo "Then try:  $DIR/rd add \"buy milk\" --due 17:00"
+echo "Then try:  $DIR/untildone add \"buy milk\" --due 17:00"
 echo "Control:   $DIR/daemonctl {status|stop|start|restart|log|tick}"

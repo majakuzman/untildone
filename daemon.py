@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""reminder_daemon — a task tracker you drive from a chat (or a CLI), that nags you until done.
+"""untildone — a task tracker you drive from a chat (or a CLI), that nags you until done.
 macOS only for now (launchd + Apple Reminders). See README.md; the Claude protocol is in CLAUDE.md.
 
 Usage:

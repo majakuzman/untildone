@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""rd — command-line front end for reminder_daemon. Same mailbox the chat uses.
+"""untildone — command-line front end. Same mailbox the chat uses.
 
-  rd add "buy milk" [--due 17:00 | 2026-09-02 | 2026-09-02T14:00] [--project work]
+  untildone add "buy milk" [--due 17:00 | 2026-09-02 | 2026-09-02T14:00] [--project work]
                     [--assignee Dunja] [--status in_progress] [--idea] [--notes "..."]
-  rd done <id-or-title-fragment>
-  rd update <id> [--due ...] [--status ...] [--assignee ...] [--project ...] [--title ...]
-  rd snooze <id> [--minutes 60]
-  rd export [--project work] [--assignee Dunja] [--from 2026-09-01] [--to 2026-09-30]
-  rd list                      open tasks, from status.json
-  rd log [n]                   last n daemon log lines
+  untildone done <id-or-title-fragment>
+  untildone update <id> [--due ...] [--status ...] [--assignee ...] [--project ...] [--title ...]
+  untildone snooze <id> [--minutes 60]
+  untildone export [--project work] [--assignee Dunja] [--from 2026-09-01] [--to 2026-09-30]
+  untildone list                      open tasks, from status.json
+  untildone log [n]                   last n daemon log lines
 
 Every command writes one JSON file to inbox_local/ and runs one daemon tick so you
 see the result immediately (the background agent would have picked it up within a minute anyway).
