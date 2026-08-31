@@ -24,6 +24,8 @@ import sys
 import time
 from datetime import datetime, timedelta
 
+__version__ = "0.99.0"
+
 # ------------------------------------------------------- paths / config ---
 # HOME is the folder this file lives in (override with RD_HOME for tests).
 # Everything user-specific comes from HOME/config.json, written by install.sh:
@@ -554,6 +556,7 @@ def write_status(conn, ingest_results=None, fired=None):
         "FROM status_log l JOIN tasks t ON t.id=l.task_id ORDER BY l.changed_at DESC LIMIT 10"
     ).fetchall()]
     status = {
+        "version": __version__,
         "generated_at": iso(now()),
         "open_count": len(open_rows),
         "open_by_assignee": {k: len(v) for k, v in by_assignee.items()},
