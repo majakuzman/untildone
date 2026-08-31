@@ -43,7 +43,7 @@ At 17:00 your Mac notifies you and a `[T001] buy milk` reminder appears on your 
 
 ## Using it from Claude
 
-The point of the project. Paste [`CLAUDE.md`](CLAUDE.md) into a Claude Project's instructions, give Claude Desktop's Filesystem connector access to this folder, and talk normally: *"remind me to pay the half marathon Tuesday at 2"*, *"Dunja is starting the QC report"*, *"what's open?"*, *"done toothpaste"*.
+The point of the project. Paste [`CLAUDE.md`](CLAUDE.md) into a Claude Project's instructions, give Claude Desktop's Filesystem connector access to this folder, and talk normally: *"remind me to pay the half marathon Tuesday at 2"*, *"Dunja is starting the QC report"*, *"what's open?"*, *"done toothpaste"*. Day-to-day phrases and what to expect: [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). The story in 12 slides: [`docs/untildone-showcase.pdf`](docs/untildone-showcase.pdf).
 
 From a phone, Claude can't touch your files, so it drops the same JSON into a **Google Drive folder** that Google Drive for desktop syncs to your Mac. Set `drive_folder` in `config.json` (or answer the install prompt) and the daemon watches that folder too. Skip it and everything still works laptop-only.
 

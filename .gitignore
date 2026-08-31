@@ -1,4 +1,5 @@
 # --- personal data: never commit ---
+docs/*pptx
 tasks.db
 tasks.db-journal
 status.json
