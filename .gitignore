@@ -1,0 +1,18 @@
+# --- personal data: never commit ---
+tasks.db
+tasks.db-journal
+status.json
+config.json
+daemon.log
+daemon.log.*
+launchd.*.log
+inbox_local/
+inbox_failed/
+exports/
+.claude_heartbeat
+NOTES.md
+# --- OS / editor ---
+.DS_Store
+__pycache__/
+*.pyc
+.venv/

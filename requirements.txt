@@ -1,0 +1,2 @@
+# Standard library only. Nothing to install.
+# (Python >= 3.8, macOS for the Reminders bridge.)

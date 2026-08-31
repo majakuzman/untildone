@@ -1,0 +1,11 @@
+#!/bin/bash
+# Refuse to commit anything that could contain personal task data.
+bad='^(tasks\.db|status\.json|config\.json|daemon\.log|NOTES\.md|\.claude_heartbeat|inbox_local/|inbox_failed/|exports/|launchd\.)'
+hits="$(git diff --cached --name-only | grep -E "$bad" || true)"
+if [ -n "$hits" ]; then
+  echo "pre-commit: refusing to commit personal data files:"; echo "$hits" | sed 's/^/  /'
+  echo "unstage them: git restore --staged <file>"; exit 1
+fi
+if git diff --cached | grep -qE '"action"\s*:\s*"(add|done|update)"'; then
+  echo "pre-commit: a staged file looks like a task command (JSON with \"action\"). Refusing."; exit 1
+fi
