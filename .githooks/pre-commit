@@ -6,6 +6,8 @@ if [ -n "$hits" ]; then
   echo "pre-commit: refusing to commit personal data files:"; echo "$hits" | sed 's/^/  /'
   echo "unstage them: git restore --staged <file>"; exit 1
 fi
-if git diff --cached | grep -qE '"action"\s*:\s*"(add|done|update)"'; then
-  echo "pre-commit: a staged file looks like a task command (JSON with \"action\"). Refusing."; exit 1
+# No .json file belongs in this repo: every one is either config or a task command.
+jsons="$(git diff --cached --name-only | grep -E '\.json$' || true)"
+if [ -n "$jsons" ]; then
+  echo "pre-commit: staged .json files look like task commands or config. Refusing:"; echo "$jsons" | sed 's/^/  /'; exit 1
 fi

@@ -1,6 +1,16 @@
 # CLAUDE.md — how to drive reminder_daemon from chat
 
-Paste this into a Claude Project's custom instructions (or user preferences). It tells Claude how to turn natural language into daemon commands. Fill in the two paths at the bottom.
+Paste the section below the line into a Claude Project's custom instructions (or user preferences). It tells Claude how to turn natural language into daemon commands. Fill in the two paths at the bottom.
+
+## Prerequisites (one-time, on your side)
+
+1. **The daemon is installed and running** on the Mac — `bash install.sh` done, `./daemonctl status` says `state = running`. See README.md.
+2. **Claude Desktop** (Mac app), with the **Filesystem connector** enabled and granted access to the folder that contains `daemon.py`. Claude Desktop → Settings → Connectors → Filesystem → add that folder. Without this Claude can only read/write inside folders you've listed.
+3. **Google Drive connector** connected to your Google account (Claude Settings → Connectors). Needed for the phone path; optional if you only ever use the laptop.
+4. **Google Drive for desktop** installed on the Mac and syncing the mailbox folder, with that folder's local path in `config.json` as `drive_folder`. Optional, same as above.
+5. **A Claude Project** (claude.ai → Projects) whose custom instructions contain the text below. Chats outside that project won't know the protocol unless you also put it in user preferences.
+
+What Claude *cannot* do, so you don't wait for it: run commands, start the daemon, install anything, or write binary files. It writes small text files and reads `status.json`. Everything else is the daemon.
 
 ---
 
